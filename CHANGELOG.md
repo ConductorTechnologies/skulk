@@ -1,3 +1,9 @@
+### Version:0.1.1 -- 17 Jun 2020
+
+* Bump version file to 0.1.1. [11cc1b5]
+* Remove debug output. [7967b5f]
+* Main guard. [a0a66a8]
+
 ### Version:0.1.0 -- 17 Jun 2020
 
 * Adds re import. [fb4f361]
