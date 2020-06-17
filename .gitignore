@@ -30,7 +30,7 @@ Thumbs.db
 .settings
 
 #pip
-conductor.c4d.egg-info
+*.egg-info
 dist
 build
 # virtualenv
@@ -58,7 +58,7 @@ codeship.aes
 
 # vscode
 .vscode
-conductor-c4d.code-workspace
+*.code-workspace
 
 
 fixtures_disable
