@@ -105,7 +105,6 @@ def resolve_version(repo, version_file, which_pypi):
             match = re.compile(
                 r"^__version__.*=(?:[\s\"']+)(.*)(?:[\s\"'])$").match(line.strip())
             if match:
-                print "MATTCCCHHHHHHH"
                 __version__ = match.group(1)
                 break
 
