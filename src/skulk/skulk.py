@@ -361,5 +361,5 @@ def write_version_file(version_file, version):
     with open(version_file, "w") as f:
         f.write(content)
 
-
-main()
+if __name__ == "__main__":
+    main()
