@@ -261,10 +261,9 @@ def push_branch_and_tag(repo, tag):
             sys.stderr.write("Aborted:\n")
             sys.exit(1)
 
-    origin = repo.remotes.origin
-    origin.push(repo.head.ref)
+    repo.remotes.origin.push(repo.head.ref)
     if tag:
-        origin.push(tag)
+        repo.remotes.origin.push(tag)
         print "Pushed branch:{} and tag: {}".format(repo.head.ref, tag)
         return
     print "Pushed branch:{} but no tag.".format(repo.head.ref)
