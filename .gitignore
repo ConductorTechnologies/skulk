@@ -1,0 +1,64 @@
+# Junk
+###########
+.DS_Store
+Thumbs.db
+*.pyc
+*.project
+*.pydevproject
+
+# Security
+###########
+#bin/auth/
+#secret_keys.py
+#*.dat
+#*.pem
+#*.json
+
+
+# Emacs
+###########
+\#*\#
+.\#*
+*\~
+
+# Vi
+###########
+.*.swp
+.*~
+
+# eclipse
+.settings
+
+#pip
+conductor.c4d.egg-info
+dist
+build
+# virtualenv
+venv
+
+
+# secrets (to be factored out)
+auth/*
+
+# config
+config.yml
+
+# pycharm
+.idea
+
+# vim tags
+tags
+GPATH
+GTAGS
+
+#build
+build.env
+tmp/
+codeship.aes
+
+# vscode
+.vscode
+conductor-c4d.code-workspace
+
+
+fixtures_disable

@@ -1,0 +1,365 @@
+#!/usr/bin/env python
+
+
+import datetime
+import os
+import re
+import subprocess
+import sys
+from distutils.version import LooseVersion
+from shutil import rmtree
+
+from git import InvalidGitRepositoryError, Repo
+
+PROD_PYPI_INDEX = "https://pypi.org/simple/"
+TEST_PYPI_INDEX = "https://test.pypi.org/simple/"
+
+
+def green(rhs):
+    return "\033[92m{}\033[0m".format(rhs)
+
+
+def fail(rhs):
+    return "\033[91m{}\033[0m".format(rhs)
+
+
+def main():
+
+    repo = get_repo()
+
+    which_pypi = get_pypi()
+
+    version_file = get_version_file(repo)
+    print version_file
+    changelog = get_changelog(repo)
+
+    __version__ = resolve_version(repo, version_file, which_pypi)
+
+    resolve_changelog(repo, __version__, changelog)
+
+    check_clean(repo)
+
+    tag = create_tag(repo, __version__)
+
+    push_branch_and_tag(repo, tag)
+
+    publish(repo, which_pypi, __version__)
+
+
+def get_repo():
+    try:
+        repo = Repo(".")
+    except InvalidGitRepositoryError:
+        sys.stderr.write("Not a git repo.\n")
+        sys.exit(1)
+    if repo.untracked_files:
+        sys.stderr.write("Untracked files.\n")
+        sys.exit(1)
+    if repo.is_dirty():
+        sys.stderr.write("Dirty repo.\n")
+        sys.exit(1)
+    return repo
+
+
+def get_pypi():
+    print "Choose a PyPi repo ..."
+    options = ["Don't publish", "Test PyPi", "Prod PyPi"]
+    for i, opt in enumerate(options):
+        print("{}:{}".format(i, opt))
+
+    inp = int(input(green("Enter a number: ")))
+    if inp in [0, 1, 2]:
+        print "You chose: {}".format(options[inp])
+        return inp
+    else:
+        sys.stderr.write(
+            "Bad input: {}\n".format(inp))
+        sys.exit(1)
+
+
+def get_version_file(repo):
+    slug = os.path.basename(repo.working_dir).replace("-", os.sep)
+    version_file = os.path.join(
+        repo.working_dir, "src", slug, "__version__.py")
+    if not os.path.isfile(version_file):
+        sys.stderr.write(
+            "Version file does not exist: {}\n".format(version_file))
+        sys.exit(1)
+    return version_file
+
+
+def get_changelog(repo):
+    changelog = os.path.join(
+        repo.working_dir, "CHANGELOG.md")
+    if not os.path.isfile(changelog):
+        sys.stderr.write(
+            "Skipping - CHANGELOG does not exist: {}\n".format(changelog))
+        sys.exit(1)
+    return changelog
+
+
+def resolve_version(repo, version_file, which_pypi):
+    __version__ = None
+    with open(version_file) as vf:
+        for line in vf:
+            match = re.compile(
+                r"^__version__.*=(?:[\s\"']+)(.*)(?:[\s\"'])$").match(line.strip())
+            if match:
+                print "MATTCCCHHHHHHH"
+                __version__ = match.group(1)
+                break
+
+    git_tags = [str(tag) for tag in numeric_tags(repo.tags)]
+    if git_tags:
+        print "Git tags: ", git_tags
+    else:
+        print "No Git tags exist."
+
+    name = os.path.basename(repo.working_dir)
+    pypi_versions = get_pypi_versions(name, which_pypi)
+    print "PyPi versions:", pypi_versions
+
+    print "__version__ is:", __version__
+    version_ok = False
+    change_version = False
+    while not version_ok:
+        version_problems = get_version_problems(
+            __version__, pypi_versions, git_tags)
+        if version_problems:
+            print version_problems
+            __version__ = raw_input(green("Enter a valid version: "))
+            change_version = True
+        else:
+            print "No version problems. "
+            version_ok = True
+
+    print "YAY! __version__ {} is valid".format(__version__)
+
+    if change_version:
+        print "Overwriting version file..."
+        write_version_file(version_file, __version__)
+        if repo.is_dirty():
+            repo.index.add([version_file])
+            repo.index.commit("Bump version file to {}".format(__version__))
+            print "Committed version bump..."
+    return __version__
+
+
+def resolve_changelog(repo, __version__, changelog):
+    print "resolve changelog here:"
+
+    print "Edit the changelog now. Here are some recent commits..."
+
+    most_recent_messages = []
+
+    git_tags = numeric_tags(repo.tags)
+    numtags = len(git_tags)
+    if numtags > 3:
+        git_tags = git_tags[-3]
+
+    tagid = 0
+    currtag = git_tags[tagid] if numtags else None
+    started = False
+    most_recent = False
+    print "=" * 30
+    if currtag:
+        for entry in repo.head.reference.log():
+            if currtag and entry.newhexsha == currtag.commit.hexsha:
+                started = True
+                print "{} {}".format(currtag.commit.hexsha[:6], currtag)
+                tagid += 1
+                currtag = git_tags[tagid] if tagid < len(git_tags) else None
+                if tagid == len(git_tags):
+                    most_recent = True
+            if started:
+                print "{} {}".format(entry.newhexsha[:6], entry.message)
+                if most_recent:
+                    most_recent_messages.append("* {}. [{}]".format(
+                        entry.message.replace("commit:", "").strip().capitalize(),  entry.newhexsha[:7]))
+    else:
+        for entry in repo.head.reference.log()[:20]:
+            print "{} {}".format(entry.newhexsha[:6], entry.message)
+            most_recent_messages.append("* {}. [{}]".format(
+                entry.message.replace("commit:", "").strip().capitalize(),  entry.newhexsha[:7]))
+    print "=" * 30
+
+    today = datetime.date.today().strftime("%d %b %Y")
+    recent_block = "### Version:{} -- {}\n\n".format(__version__, today)
+    recent_block += "\n".join(reversed(most_recent_messages)) or ""
+
+    with file(changelog, 'r') as clog:
+        data = clog.read() or "--"
+
+    new_content = recent_block + "\n\n" + data
+
+    with file(changelog, 'w') as clog:
+        clog.write(new_content)
+
+    print "A new section has been prepended to your changelog."
+
+    raw_input(
+        green("Please edit and save your CHANGELOG, then press enter to continue."))
+    if repo.is_dirty():
+        repo.index.add([changelog])
+        repo.index.commit("update changelog")
+        print "Commit updated misc files"
+
+
+def check_clean(repo):
+    options = ["Fix manually and continue",
+               "Auto commit and continue", "Abort"]
+    while repo.is_dirty():
+        print "Repo is dirty. Maybe you changed something else along the way?"
+        for i, opt in enumerate(options):
+            print("{}:{}".format(i, opt))
+
+        inp = int(input(green("Enter a number: ")))
+
+        if inp == 1:
+            repo.index.add(["*"])
+            repo.index.commit(
+                "Staged and committed various files to ensure clean repo")
+            print "Commit misc files"
+        elif inp == 2:
+            sys.stderr.write("Aborted:\n")
+            sys.exit(1)
+
+
+def create_tag(repo, __version__):
+    options = ["No", "Yes",  "Abort"]
+    inp = -1
+    while inp not in [0, 1, 2]:
+        print "Do you want to add the tag and continue?"
+        for i, opt in enumerate(options):
+            print("{}:{}".format(i, opt))
+
+        inp = int(input(green("Enter a number: ")))
+        if inp == 2:
+            sys.stderr.write("Aborted:\n")
+            sys.exit(1)
+        if inp == 1:
+            tag = repo.create_tag(
+                __version__, message="Tagged at version {} in release release script.".format(__version__))
+            print "Created tag for version {}".format(__version__)
+            return tag
+
+    print "You chose not to make a tag!"
+
+
+def push_branch_and_tag(repo, tag):
+    options = ["No", "Yes",  "Abort"]
+    inp = -1
+    while inp not in [0, 1, 2]:
+        print "Do you want to push the branch and tag?"
+        for i, opt in enumerate(options):
+            print("{}:{}".format(i, opt))
+        inp = int(input(green("Enter a number: ")))
+
+        if inp == 0:
+            print "Skipped push..."
+            return
+        if inp == 2:
+            sys.stderr.write("Aborted:\n")
+            sys.exit(1)
+
+    origin = repo.remotes.origin
+    origin.push(repo.head.ref)
+    if tag:
+        origin.push(tag)
+        print "Pushed branch:{} and tag: {}".format(repo.head.ref, tag)
+        return
+    print "Pushed branch:{} but no tag.".format(repo.head.ref)
+
+
+def publish(repo, which_pypi, __version__):
+    if not which_pypi:
+        print "Skipped publish due to earlier choice."
+        return
+    pypi_repo = [None, "Test PyPi", "Prod PyPi"][which_pypi]
+
+    options = ["No", "Yes",  "Abort"]
+    inp = -1
+    while inp not in [0, 1, 2]:
+        print "Do you still want to publish to the {} repo?: ".format(
+            pypi_repo)
+        for i, opt in enumerate(options):
+            print("{}:{}".format(i, opt))
+        inp = int(input(green("Enter a number: ")))
+
+        if inp == 0:
+            print "Skipped publish..."
+            return
+        if inp == 2:
+            sys.stderr.write("Aborted:\n")
+            sys.exit(1)
+
+    try:
+        print "Removing previous builds..."
+        rmtree(os.path.join(repo.working_dir, "dist"))
+    except OSError:
+        pass
+
+    print "Building Source and Wheel distribution..."
+    os.system("{0} setup.py sdist bdist_wheel".format(sys.executable))
+
+    print "Uploading distributions..."
+    if which_pypi == 1:
+        os.system("twine upload -r testpypi dist/*")
+    else:
+        os.system("twine upload  dist/*")
+    print "Finished uploading to PyPi..."
+
+
+def get_pypi_versions(name, which_pypi):
+    if not which_pypi:
+        return []
+    namespace = name.replace("-", ".")
+    ns = "{}==".format(namespace)
+    result = []
+    output = subprocess.Popen([
+        'pip',
+        'install',
+        '--index-url',
+        [None, TEST_PYPI_INDEX, PROD_PYPI_INDEX][which_pypi],
+        ns
+    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+
+    try:
+        output = output[1]
+    except IndexError:
+        print "Can't determine existing package versions."
+        sys.exit(1)
+
+    regex = re.compile(
+        r'^.*Could not find a version.*from versions:(.*)\).*', re.DOTALL)
+    match = regex.match(output)
+    if match:
+        result = [v.strip() for v in match.group(1).split(r', ')]
+        result = [v for v in result if v and v[0].isdigit()]
+    return result
+
+
+def get_version_problems(__version__, pypi_versions,  git_tags):
+    if not __version__:
+        return "__version__ is corrupt or non existent"
+    if git_tags:
+        if __version__ in git_tags or LooseVersion(__version__) <= LooseVersion(git_tags[-1]):
+            return "__version__ {} invalid in git tags. You must change it!".format(__version__)
+    if pypi_versions:
+        if __version__ in pypi_versions or LooseVersion(__version__) <= LooseVersion(pypi_versions[-1]):
+            return "__version__ {} invalid in pypi versions. You must change it!".format(__version__)
+
+
+def numeric_tags(tags):
+    if tags:
+        return[tag for tag in tags if str(tag)[0].isdigit()]
+    return []
+
+
+def write_version_file(version_file, version):
+    content = "__version__ = '{}'".format(version)
+    with open(version_file, "w") as f:
+        f.write(content)
+
+
+main()
