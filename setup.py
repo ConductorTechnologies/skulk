@@ -10,7 +10,7 @@ URL = "https://github.com/AtomicConductor/skulk"
 EMAIL = "julian@conductortech.com"
 AUTHOR = "Julian Mann"
 REQUIRES_PYTHON = "~=2.7"
-REQUIRED = ["GitPython=2.1.15"]
+REQUIRED = ["GitPython==2.1.15"]
 HERE = os.path.abspath(os.path.dirname(__file__))
 SLUG = NAME.lower().replace("-", "_").replace(" ", "_").replace(".", os.sep)
 
