@@ -1,3 +1,8 @@
+### Version:0.1.3 -- 17 Jun 2020
+
+* Bump version file to 0.1.3. [a0664ff]
+* Update changelog. [ed67df7]
+
 ### Version:0.1.2 -- 17 Jun 2020
 
 * Bump version file to 0.1.2. [b09dfd4]
