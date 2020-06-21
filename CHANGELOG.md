@@ -1,5 +1,15 @@
 ### Version:0.1.4 -- 21 Jun 2020
 
+* Update changelog. [4a637ca]
+* Write simple version. [548082d]
+* Update changelog. [1d829d0]
+* Fixed slicing bug. [8d219c6]
+* Bump version file to 0.1.4. [3382969]
+* Use version and no slug. [3303d02]
+* Update changelog. [e81670a]
+
+### Version:0.1.4 -- 21 Jun 2020
+
 * Write simple version. [548082d]
 * Update changelog. [1d829d0]
 * Fixed slicing bug. [8d219c6]
