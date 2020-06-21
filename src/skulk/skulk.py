@@ -136,7 +136,9 @@ def resolve_version(repo, version_file, which_pypi):
 
     if change_version:
         print "Overwriting version file..."
-        write_version_file(version_file, __version__)
+        with open(version_file, "w") as f:
+            f.write(__version__)
+
         if repo.is_dirty():
             repo.index.add([version_file])
             repo.index.commit("Bump version file to {}".format(__version__))
@@ -354,10 +356,9 @@ def numeric_tags(tags):
     return []
 
 
-def write_version_file(version_file, version):
-    content = "__version__ = '{}'".format(version)
-    with open(version_file, "w") as f:
-        f.write(content)
+# def write_version_file(version_file, version):
+#     with open(version_file, "w") as f:
+#         f.write(version)
 
 if __name__ == "__main__":
     main()
