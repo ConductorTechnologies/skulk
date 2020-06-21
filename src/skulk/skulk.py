@@ -154,7 +154,7 @@ def resolve_changelog(repo, __version__, changelog):
     git_tags = numeric_tags(repo.tags)
     numtags = len(git_tags)
     if numtags > 3:
-        git_tags = git_tags[-3]
+        git_tags = git_tags[-3:]
 
     tagid = 0
     currtag = git_tags[tagid] if numtags else None
