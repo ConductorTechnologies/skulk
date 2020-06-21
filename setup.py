@@ -12,15 +12,10 @@ AUTHOR = "Julian Mann"
 REQUIRES_PYTHON = "~=2.7"
 REQUIRED = ["GitPython==2.1.15"]
 HERE = os.path.abspath(os.path.dirname(__file__))
-SLUG = NAME.lower().replace("-", "_").replace(" ", "_").replace(".", os.sep)
 
-with open(os.path.join(HERE, "src", SLUG, "__version__.py")) as vf:
-    for line in vf:
-        match = re.compile(
-            r"^__version__.*=(?:[\s\"']+)(.*)(?:[\s\"'])$").match(line.strip())
-        if match:
-            VERSION = match.group(1)
-            break
+with open(os.path.join(HERE, "src", NAME, 'VERSION')) as version_file:
+    VERSION = version_file.read().strip()
+
 
 setuptools.setup(
     author=AUTHOR,

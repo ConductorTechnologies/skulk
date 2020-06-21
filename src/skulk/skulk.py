@@ -78,12 +78,16 @@ def get_pypi():
 
 
 def get_version_file(repo):
-    slug = os.path.basename(repo.working_dir).replace("-", os.sep)
-    version_file = os.path.join(
-        repo.working_dir, "src", slug, "__version__.py")
-    if not os.path.isfile(version_file):
+    found=False
+    for root, _, files in os.walk(repo.working_dir):
+        if "VERSION" in files:
+            found = True
+            version_file = os.path.join(root, "VERSION")
+            break
+
+    if not found:
         sys.stderr.write(
-            "Version file does not exist: {}\n".format(version_file))
+            "VERSION file does not exist in repo.\n")
         sys.exit(1)
     return version_file
 
@@ -99,14 +103,10 @@ def get_changelog(repo):
 
 
 def resolve_version(repo, version_file, which_pypi):
-    __version__ = None
+ 
+
     with open(version_file) as vf:
-        for line in vf:
-            match = re.compile(
-                r"^__version__.*=(?:[\s\"']+)(.*)(?:[\s\"'])$").match(line.strip())
-            if match:
-                __version__ = match.group(1)
-                break
+        __version__ = vf.read().strip()
 
     git_tags = [str(tag) for tag in numeric_tags(repo.tags)]
     if git_tags:
