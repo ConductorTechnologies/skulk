@@ -1,3 +1,10 @@
+### Version:__version__ = '0.1.4' -- 21 Jun 2020
+
+* Fixed slicing bug. [8d219c6]
+* Bump version file to 0.1.4. [3382969]
+* Use version and no slug. [3303d02]
+* Update changelog. [e81670a]
+
 ### Version:0.1.3 -- 17 Jun 2020
 
 * Bump version file to 0.1.3. [a0664ff]
