@@ -1,3 +1,7 @@
+### Version:0.1.5 -- 22 Jun 2020
+
+* Flattened. [5bcc68f]
+
 ### Version:0.1.4 -- 21 Jun 2020
 
 * Update changelog. [4a637ca]
