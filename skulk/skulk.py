@@ -78,16 +78,10 @@ def get_pypi():
 
 
 def get_version_file(repo):
-    found=False
-    for root, _, files in os.walk(repo.working_dir):
-        if "VERSION" in files:
-            found = True
-            version_file = os.path.join(root, "VERSION")
-            break
-
-    if not found:
+    version_file = os.path.join(repo.working_dir, "VERSION")
+    if not os.path.isfile(version_file):
         sys.stderr.write(
-            "VERSION file does not exist in repo.\n")
+            "VERSION file does not exist in top level of repo.\n")
         sys.exit(1)
     return version_file
 
@@ -103,7 +97,6 @@ def get_changelog(repo):
 
 
 def resolve_version(repo, version_file, which_pypi):
- 
 
     with open(version_file) as vf:
         __version__ = vf.read().strip()
@@ -153,40 +146,48 @@ def resolve_changelog(repo, __version__, changelog):
 
     most_recent_messages = []
 
-    git_tags = numeric_tags(repo.tags)
+    git_tags = list(reversed(numeric_tags(repo.tags)[-3:]))
     numtags = len(git_tags)
-    if numtags > 3:
-        git_tags = git_tags[-3:]
+    print "num tags:", numtags
+    # git_tags = git_tags[-3:]
 
     tagid = 0
     currtag = git_tags[tagid] if numtags else None
-    started = False
-    most_recent = False
+ 
     print "=" * 30
-    if currtag:
-        for entry in repo.head.reference.log():
-            if currtag and entry.newhexsha == currtag.commit.hexsha:
-                started = True
-                print "{} {}".format(currtag.commit.hexsha[:6], currtag)
+    if not currtag:
+        for commit in repo.iter_commits(repo.head):
+            msg = commit.message.encode('utf-8').strip()
+            print "{} {}".format(commit.hexsha[:7], msg)
+            most_recent_messages.append("* {}. [{}]".format(msg.capitalize(),  commit.hexsha[:7]))
+    
+    else: #tags exist
+        counter = 0 
+        on_first_tag = True
+        for commit in repo.iter_commits(repo.head):
+            if currtag and commit.hexsha == currtag.commit.hexsha:
+                print "TAG {} {}".format(currtag.commit.hexsha[:7], currtag)
                 tagid += 1
-                currtag = git_tags[tagid] if tagid < len(git_tags) else None
-                if tagid == len(git_tags):
-                    most_recent = True
-            if started:
-                print "{} {}".format(entry.newhexsha[:6], entry.message)
-                if most_recent:
-                    most_recent_messages.append("* {}. [{}]".format(
-                        entry.message.replace("commit:", "").strip().capitalize(),  entry.newhexsha[:7]))
-    else:
-        for entry in repo.head.reference.log()[:20]:
-            print "{} {}".format(entry.newhexsha[:6], entry.message)
-            most_recent_messages.append("* {}. [{}]".format(
-                entry.message.replace("commit:", "").strip().capitalize(),  entry.newhexsha[:7]))
+                currtag = git_tags[tagid] if tagid < numtags else None
+
+            if tagid == numtags: #currtag is last tag
+                counter +=1
+            
+            msg = commit.message.encode('utf-8').strip()
+            print "{} {}".format(commit.hexsha[:7], msg)
+            
+            if on_first_tag: #sti8ll looking for tagid 0 
+                most_recent_messages.append("* {}. [{}]".format(msg.capitalize(),  commit.hexsha[:7]))
+                if tagid > 0:
+                    on_first_tag = False
+            elif counter >=20:
+                break
+     
     print "=" * 30
 
     today = datetime.date.today().strftime("%d %b %Y")
     recent_block = "### Version:{} -- {}\n\n".format(__version__, today)
-    recent_block += "\n".join(reversed(most_recent_messages)) or ""
+    recent_block += "\n".join(most_recent_messages) or ""
 
     with file(changelog, 'r') as clog:
         data = clog.read() or "--"
@@ -352,7 +353,7 @@ def get_version_problems(__version__, pypi_versions,  git_tags):
 
 def numeric_tags(tags):
     if tags:
-        return[tag for tag in tags if str(tag)[0].isdigit()]
+        return sorted([tag for tag in tags if str(tag)[0].isdigit()], key=lambda tag: LooseVersion(str(tag)))
     return []
 
 
