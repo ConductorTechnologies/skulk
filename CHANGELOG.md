@@ -1,5 +1,9 @@
 ### Version:0.1.6 -- 19 Sep 2020
 
+* Py3 compat. [d6e9d5a]
+
+### Version:0.1.6 -- 19 Sep 2020
+
 
 * Python 3 compatibility. [ec8d67c]
 
