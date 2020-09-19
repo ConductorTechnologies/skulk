@@ -187,7 +187,7 @@ def resolve_changelog(repo, __version__, changelog):
             if tagid == numtags: #currtag is last tag
                 counter +=1
             
-            msg = commit.message.decode().strip()
+            msg = commit.message.strip()
             print("{} {}".format(commit.hexsha[:7], msg))
             
             if on_first_tag: #sti8ll looking for tagid 0 
