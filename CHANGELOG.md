@@ -1,4 +1,4 @@
-### Version:0.1.6 -- 19 Sep 2020
+### Version:0.1.7 -- 19 Sep 2020
 
 * Py3 compat. [d6e9d5a]
 
