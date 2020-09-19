@@ -18,10 +18,8 @@ TEST_PYPI_INDEX = "https://test.pypi.org/simple/"
 def green(rhs):
     return "\033[92m{}\033[0m".format(rhs)
 
-
-def fail(rhs):
+def red(rhs):
     return "\033[91m{}\033[0m".format(rhs)
-
 
 def main():
 
@@ -85,6 +83,19 @@ def get_version_file(repo):
         sys.exit(1)
     return version_file
 
+def get_pip_name(repo):
+
+    manifest_file = os.path.join(repo.working_dir, "MANIFEST.in")
+    if  os.path.isfile(manifest_file):
+        with open(manifest_file) as f:
+            first_line = f.readline().strip().split(" ")
+            if len(first_line) == 2 and first_line[0] == "#":
+                return first_line[1]
+
+    return os.path.basename(repo.working_dir)
+ 
+
+
 
 def get_changelog(repo):
     changelog = os.path.join(
@@ -107,7 +118,8 @@ def resolve_version(repo, version_file, which_pypi):
     else:
         print "No Git tags exist."
 
-    name = os.path.basename(repo.working_dir)
+    name = get_pip_name(repo)
+
     pypi_versions = get_pypi_versions(name, which_pypi)
     print "PyPi versions:", pypi_versions
 
@@ -314,16 +326,18 @@ def publish(repo, which_pypi, __version__):
 def get_pypi_versions(name, which_pypi):
     if not which_pypi:
         return []
-    namespace = name.replace("-", ".")
-    ns = "{}==".format(namespace)
+
     result = []
-    output = subprocess.Popen([
+    args = [
         'pip',
         'install',
         '--index-url',
         [None, TEST_PYPI_INDEX, PROD_PYPI_INDEX][which_pypi],
-        ns
-    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        "{}==".format(name)
+    ]
+
+    # print " ".join(args)
+    output = subprocess.Popen( args, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
     try:
         output = output[1]
