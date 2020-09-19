@@ -2,6 +2,7 @@
 
 
 from __future__ import print_function  
+from builtins import input
 import datetime
 import os
 import re
@@ -132,7 +133,7 @@ def resolve_version(repo, version_file, which_pypi):
             __version__, pypi_versions, git_tags)
         if version_problems:
             print(version_problems)
-            __version__ = raw_input(green("Enter a valid version: "))
+            __version__ = input(green("Enter a valid version: "))
             change_version = True
         else:
             print("No version problems. ")
@@ -212,7 +213,7 @@ def resolve_changelog(repo, __version__, changelog):
 
     print("A new section has been prepended to your changelog.")
 
-    raw_input(
+    input(
         green("Please edit and save your CHANGELOG, then press enter to continue."))
     if repo.is_dirty():
         repo.index.add([changelog])
