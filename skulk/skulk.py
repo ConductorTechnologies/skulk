@@ -345,11 +345,10 @@ def get_pypi_versions(name, which_pypi):
         print("Can't determine existing package versions.")
         sys.exit(1)
 
-    regex = re.compile(
-        rb'^.*Could not find a version.*from versions:(.*)\).*', re.DOTALL)
+    regex = re.compile(rb'^.*Could not find a version.*from versions:(.*)\).*', re.DOTALL)
     match = regex.match(output) 
     if match:
-        result = [v.strip() for v in match.group(1).split(r', ')]
+        result = [v.strip() for v in match.group(1).split(rb', ')]
         result = [v for v in result if v and v[0].isdigit()]
     return result
 
