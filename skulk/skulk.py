@@ -203,12 +203,12 @@ def resolve_changelog(repo, __version__, changelog):
     recent_block = "### Version:{} -- {}\n\n".format(__version__, today)
     recent_block += "\n".join(most_recent_messages) or ""
 
-    with file(changelog, 'r') as clog:
+    with open(changelog, 'r') as clog:
         data = clog.read() or "--"
 
     new_content = recent_block + "\n\n" + data
 
-    with file(changelog, 'w') as clog:
+    with open(changelog, 'w') as clog:
         clog.write(new_content)
 
     print("A new section has been prepended to your changelog.")
