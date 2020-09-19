@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 
+from __future__ import print_function  
 import datetime
 import os
 import re
@@ -8,7 +9,6 @@ import subprocess
 import sys
 from distutils.version import LooseVersion
 from shutil import rmtree
-from __future__ import print_function  
 
 from git import InvalidGitRepositoryError, Repo
 
@@ -153,7 +153,7 @@ def resolve_version(repo, version_file, which_pypi):
 
 
 def resolve_changelog(repo, __version__, changelog):
-    print "resolve changelog here:"
+    print("resolve changelog here:")
 
     print("Edit the changelog now. Here are some recent commits...")
 
@@ -171,7 +171,7 @@ def resolve_changelog(repo, __version__, changelog):
     if not currtag:
         for commit in repo.iter_commits(repo.head):
             msg = commit.message.encode('utf-8').strip()
-            print "{} {}".format(commit.hexsha[:7], msg)
+            print("{} {}".format(commit.hexsha[:7], msg))
             most_recent_messages.append("* {}. [{}]".format(msg.capitalize(),  commit.hexsha[:7]))
     
     else: #tags exist
