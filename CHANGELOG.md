@@ -1,3 +1,8 @@
+### Version:0.1.6 -- 19 Sep 2020
+
+
+* Python 3 compatibility. [ec8d67c]
+
 ### Version:0.1.5 -- 22 Jun 2020
 
 * Flattened. [5bcc68f]
