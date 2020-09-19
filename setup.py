@@ -38,6 +38,7 @@ setuptools.setup(
     name=NAME,
     package_dir={"": "."},
     packages=setuptools.find_packages(where="."),
+    options={"bdist_wheel": {"universal": True}},
     # python_requires=REQUIRES_PYTHON,
     url="https://github.com/AtomicConductor/skulk",
     version=VERSION,
