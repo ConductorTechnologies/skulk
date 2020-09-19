@@ -1,3 +1,7 @@
+### Version:0.1.10 -- 19 Sep 2020
+
+* Make universal wheel. [41a5b55]
+* 
 ### Version:0.1.9 -- 19 Sep 2020
 
 * Add deps. [d32f324]
