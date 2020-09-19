@@ -1,3 +1,7 @@
+### Version:0.1.8 -- 19 Sep 2020
+
+* Add deps. [d32f324]
+
 ### Version:0.1.7 -- 19 Sep 2020
 
 * Py3 compat. [d6e9d5a]
