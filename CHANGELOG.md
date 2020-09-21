@@ -1,3 +1,7 @@
+### Version:0.1.11 -- 21 Sep 2020
+
+* Fixed bad twine dependency. [7d5abdb]
+
 ### Version:0.1.10 -- 19 Sep 2020
 
 * Make universal wheel. [41a5b55]
