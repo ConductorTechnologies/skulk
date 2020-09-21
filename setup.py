@@ -32,7 +32,7 @@ setuptools.setup(
     description=DESCRIPTION,
     entry_points={"console_scripts": ["skulk=skulk.skulk:main"]},
     include_package_data=True,
-    install_requires=["GitPython>=2.1.15", "twine>=3.2.0"],
+    install_requires=["GitPython>=2.1.15", "twine>=1.15.0"],
     long_description=DESCRIPTION,
     long_description_content_type="text/markdown",
     name=NAME,
