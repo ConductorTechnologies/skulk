@@ -1,3 +1,7 @@
+### Version:0.1.12 -- 28 Sep 2020
+
+* Fix encoding bug. [40c09ea]
+
 ### Version:0.1.11 -- 21 Sep 2020
 
 * Fixed bad twine dependency. [7d5abdb]
