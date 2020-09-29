@@ -171,7 +171,8 @@ def resolve_changelog(repo, __version__, changelog):
     print("=" * 30)
     if not currtag:
         for commit in repo.iter_commits(repo.head):
-            msg = commit.message.decode().strip()
+            msg = commit.message.encode('utf-8').strip()
+            # print("msg", msg)
             print("{} {}".format(commit.hexsha[:7], msg))
             most_recent_messages.append("* {}. [{}]".format(msg.capitalize(),  commit.hexsha[:7]))
     
@@ -187,7 +188,7 @@ def resolve_changelog(repo, __version__, changelog):
             if tagid == numtags: #currtag is last tag
                 counter +=1
             
-            msg = commit.message.strip()
+            msg = commit.message.encode('utf-8').strip()
             print("{} {}".format(commit.hexsha[:7], msg))
             
             if on_first_tag: #sti8ll looking for tagid 0 
