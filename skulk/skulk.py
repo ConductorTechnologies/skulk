@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-from __future__ import print_function  
+from __future__ import print_function
 from builtins import input
 import datetime
 import os
@@ -20,8 +20,10 @@ TEST_PYPI_INDEX = u"https://test.pypi.org/simple/"
 def green(rhs):
     return "\033[92m{}\033[0m".format(rhs)
 
+
 def red(rhs):
     return "\033[91m{}\033[0m".format(rhs)
+
 
 def main():
 
@@ -85,18 +87,17 @@ def get_version_file(repo):
         sys.exit(1)
     return version_file
 
+
 def get_pip_name(repo):
 
     manifest_file = os.path.join(repo.working_dir, "MANIFEST.in")
-    if  os.path.isfile(manifest_file):
+    if os.path.isfile(manifest_file):
         with open(manifest_file) as f:
             first_line = f.readline().strip().split(" ")
             if len(first_line) == 2 and first_line[0] == "#":
                 return first_line[1]
 
     return os.path.basename(repo.working_dir)
- 
-
 
 
 def get_changelog(repo):
@@ -167,17 +168,18 @@ def resolve_changelog(repo, __version__, changelog):
 
     tagid = 0
     currtag = git_tags[tagid] if numtags else None
- 
+
     print("=" * 30)
     if not currtag:
         for commit in repo.iter_commits(repo.head):
             msg = commit.message.encode('utf-8').strip()
             # print("msg", msg)
             print("{} {}".format(commit.hexsha[:7], msg))
-            most_recent_messages.append("* {}. [{}]".format(msg.capitalize(),  commit.hexsha[:7]))
-    
-    else: #tags exist
-        counter = 0 
+            most_recent_messages.append(
+                "* {}. [{}]".format(msg.capitalize(),  commit.hexsha[:7]))
+
+    else:  # tags exist
+        counter = 0
         on_first_tag = True
         for commit in repo.iter_commits(repo.head):
             if currtag and commit.hexsha == currtag.commit.hexsha:
@@ -185,19 +187,20 @@ def resolve_changelog(repo, __version__, changelog):
                 tagid += 1
                 currtag = git_tags[tagid] if tagid < numtags else None
 
-            if tagid == numtags: #currtag is last tag
-                counter +=1
-            
+            if tagid == numtags:  # currtag is last tag
+                counter += 1
+
             msg = commit.message.encode('utf-8').strip()
             print("{} {}".format(commit.hexsha[:7], msg))
-            
-            if on_first_tag: #sti8ll looking for tagid 0 
-                most_recent_messages.append("* {}. [{}]".format(msg.capitalize(),  commit.hexsha[:7]))
+
+            if on_first_tag:  # sti8ll looking for tagid 0
+                most_recent_messages.append(
+                    "* {}. [{}]".format(msg.capitalize(),  commit.hexsha[:7]))
                 if tagid > 0:
                     on_first_tag = False
-            elif counter >=20:
+            elif counter >= 20:
                 break
-     
+
     print ("=" * 30)
 
     today = datetime.date.today().strftime("%d %b %Y")
@@ -296,7 +299,7 @@ def publish(repo, which_pypi, __version__):
     options = ["No", "Yes",  "Abort"]
     inp = -1
     while inp not in [0, 1, 2]:
-        print("Do you still want to publish to the {} repo?: ".format( pypi_repo))
+        print("Do you still want to publish to the {} repo?: ".format(pypi_repo))
         for i, opt in enumerate(options):
             print("{}:{}".format(i, opt))
         inp = int(input(green("Enter a number: ")))
@@ -315,6 +318,7 @@ def publish(repo, which_pypi, __version__):
         pass
 
     print("Building Source and Wheel distribution...")
+    os.system("{0} setup.py clean --all".format(sys.executable))
     os.system("{0} setup.py sdist bdist_wheel".format(sys.executable))
 
     print("Uploading distributions...")
@@ -339,7 +343,8 @@ def get_pypi_versions(name, which_pypi):
     ]
 
     # print " ".join(args)
-    output = subprocess.Popen( args, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+    output = subprocess.Popen(
+        args, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
     try:
         output = output[1]
@@ -347,8 +352,9 @@ def get_pypi_versions(name, which_pypi):
         print("Can't determine existing package versions.")
         sys.exit(1)
 
-    regex = re.compile(r'^.*Could not find a version.*from versions:(.*)\).*', re.DOTALL)
-    match = regex.match(output.decode('utf-8')) 
+    regex = re.compile(
+        r'^.*Could not find a version.*from versions:(.*)\).*', re.DOTALL)
+    match = regex.match(output.decode('utf-8'))
     if match:
         result = [v.strip() for v in match.group(1).split(r', ')]
         result = [v for v in result if v and v[0].isdigit()]
@@ -371,6 +377,6 @@ def numeric_tags(tags):
         return sorted([tag for tag in tags if str(tag)[0].isdigit()], key=lambda tag: LooseVersion(str(tag)))
     return []
 
- 
+
 if __name__ == "__main__":
     main()
