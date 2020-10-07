@@ -1,3 +1,7 @@
+### Version:0.1.13 -- 07 Oct 2020
+
+* Clean out build cache before running setup. [6af7fcc]
+
 ### Version:0.1.12 -- 28 Sep 2020
 
 * Fix encoding bug. [40c09ea]
@@ -9,7 +13,7 @@
 ### Version:0.1.10 -- 19 Sep 2020
 
 * Make universal wheel. [41a5b55]
-* 
+
 ### Version:0.1.9 -- 19 Sep 2020
 
 * Add deps. [d32f324]
@@ -29,45 +33,31 @@
 
 ### Version:0.1.4 -- 21 Jun 2020
 
-* Update changelog. [4a637ca]
 * Write simple version. [548082d]
-* Update changelog. [1d829d0]
 * Fixed slicing bug. [8d219c6]
-* Bump version file to 0.1.4. [3382969]
 * Use version and no slug. [3303d02]
-* Update changelog. [e81670a]
 
 ### Version:0.1.4 -- 21 Jun 2020
 
 * Write simple version. [548082d]
-* Update changelog. [1d829d0]
 * Fixed slicing bug. [8d219c6]
-* Bump version file to 0.1.4. [3382969]
 * Use version and no slug. [3303d02]
-* Update changelog. [e81670a]
 
 ### Version:__version__ = '0.1.4' -- 21 Jun 2020
 
 * Fixed slicing bug. [8d219c6]
-* Bump version file to 0.1.4. [3382969]
 * Use version and no slug. [3303d02]
-* Update changelog. [e81670a]
 
 ### Version:0.1.3 -- 17 Jun 2020
 
-* Bump version file to 0.1.3. [a0664ff]
-* Update changelog. [ed67df7]
 
 ### Version:0.1.2 -- 17 Jun 2020
 
-* Bump version file to 0.1.2. [b09dfd4]
 * Bug in setup. [4e10124]
 * Minor. [5558f5d]
-* Update changelog. [1a6e57d]
 
 ### Version:0.1.1 -- 17 Jun 2020
 
-* Bump version file to 0.1.1. [11cc1b5]
 * Remove debug output. [7967b5f]
 * Main guard. [a0a66a8]
 
